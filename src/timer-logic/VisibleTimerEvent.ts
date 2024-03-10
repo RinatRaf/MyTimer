@@ -1,6 +1,7 @@
 import {computed, makeObservable} from 'mobx';
 import {getTimeLeft} from '../utils';
 import {Ticker} from './Timer';
+import {supervisor} from '../di/supervisor';
 
 export interface TimerEvent {
   eventTime: number;
@@ -12,10 +13,11 @@ export class VisibleTimerEvent implements TimerEvent {
   public name: string;
   private ticker: Ticker;
 
-  constructor(eventTime: number, name: string, ticker: Ticker) {
+  constructor(eventTime: number, name: string) {
     this.eventTime = eventTime;
     this.name = name;
-    this.ticker = ticker;
+
+    this.ticker = supervisor.getSingleton('Ticker');
 
     makeObservable(this, {
       timeLeftString: computed,
@@ -33,4 +35,18 @@ export class VisibleTimerEvent implements TimerEvent {
 
     return `Осталось до Праздника ${leftTimes.days} дней ${hours}:${minutes}:${seconds}`;
   }
+
+  static timerEventFactory(eventTime: number, eventName: string) {
+    return new VisibleTimerEvent(eventTime, eventName);
+  }
 }
+
+export type VisibleTimerEventFactory = (
+  eventTime: number,
+  eventName: string,
+) => VisibleTimerEvent;
+
+supervisor.registerModuleFactory(
+  'VisibleTimerEvent',
+  VisibleTimerEvent.timerEventFactory,
+);

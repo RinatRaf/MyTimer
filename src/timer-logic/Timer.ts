@@ -1,4 +1,5 @@
 import {action, makeObservable, observable} from 'mobx';
+import {supervisor} from '../di/supervisor';
 
 export interface Ticker {
   now: number;
@@ -9,7 +10,7 @@ export interface ObservableTicker extends Ticker {
   cleanup: () => void;
 }
 
-export function createTicker(): ObservableTicker {
+function createTicker(): ObservableTicker {
   let interval: ReturnType<typeof setInterval> | null = null;
 
   const ticker = makeObservable(
@@ -36,3 +37,5 @@ export function createTicker(): ObservableTicker {
 
   return ticker;
 }
+
+supervisor.registerSingletonModule('Ticker', createTicker());
