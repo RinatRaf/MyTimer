@@ -1,6 +1,13 @@
 import {observer} from 'mobx-react-lite';
 import React, {useEffect, useState} from 'react';
-import {Button, SafeAreaView, Text, TextInput} from 'react-native';
+import {
+  Button,
+  Platform,
+  SafeAreaView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import {supervisor} from './src/di';
 import './src/timer-logic';
 import DateTimePicker, {
@@ -17,18 +24,32 @@ const timer = supervisor.getModuleFactory('VisibleTimerEvent')(
 );
 
 export const ObservableApp = observer(function App() {
+  useEffect(() => () => supervisor.getSingleton('Ticker').cleanup(), []);
+
+  return (
+    <SafeAreaView>
+      <EventCreator />
+    </SafeAreaView>
+  );
+});
+
+const EventCreator = () => {
   const [date, setDate] = useState(new Date());
   const [timerName, setTimerName] = useState('');
 
-  const onChange = (event, selectedDate) => {
+  const onChange = (mode: 'time' | 'date') => (_, selectedDate) => {
     const currentDate = selectedDate;
     setDate(currentDate);
+
+    if (Platform.OS === 'android' && mode === 'date') {
+      showMode('time');
+    }
   };
 
-  const showMode = currentMode => {
+  const showMode = (currentMode: 'time' | 'date') => {
     DateTimePickerAndroid.open({
       value: date,
-      onChange,
+      onChange: onChange(currentMode),
       mode: currentMode,
       is24Hour: true,
     });
@@ -38,25 +59,26 @@ export const ObservableApp = observer(function App() {
     showMode('date');
   };
 
-  const showTimepicker = () => {
-    showMode('time');
-  };
   const createTimer = () => {};
 
-  useEffect(() => () => supervisor.getSingleton('Ticker').cleanup(), []);
-
   return (
-    <SafeAreaView>
-      <Button onPress={showDatepicker} title="Show date picker!" />
-      <Button onPress={showTimepicker} title="Show time picker!" />
+    <View>
+      <Button title="Выберите дату" onPress={showDatepicker} />
       <Text>Выбрано: {date.toLocaleString()}</Text>
+      <DateTimePicker
+        value={date}
+        mode={Platform.select({default: 'date', ios: 'datetime'})}
+        onChange={onChange('date')}
+        minimumDate={TODAY}
+      />
       <TextInput
         placeholder="Название таймера"
         value={timerName}
         onChangeText={setTimerName}
       />
       <Button title="Создать" onPress={createTimer} />
-      <Text>{timer.timeLeftString}</Text>
-    </SafeAreaView>
+    </View>
   );
-});
+};
+
+const TODAY = new Date();
