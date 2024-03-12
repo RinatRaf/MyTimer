@@ -12,6 +12,7 @@ import {supervisor} from './src/di';
 import './src/timer-logic';
 import DateTimePicker, {
   DateTimePickerAndroid,
+  DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 
 const april12 = new Date();
@@ -37,21 +38,26 @@ const EventCreator = () => {
   const [date, setDate] = useState(new Date());
   const [timerName, setTimerName] = useState('');
 
-  const onChange = (mode: 'time' | 'date') => (_, selectedDate) => {
-    const currentDate = selectedDate;
-    setDate(currentDate);
+  const onChange =
+    (mode: 'time' | 'date') =>
+    (event: DateTimePickerEvent, currentDate?: Date) => {
+      if (event.type !== 'set' || !currentDate) {
+        return;
+      }
+      setDate(currentDate);
 
-    if (Platform.OS === 'android' && mode === 'date') {
-      showMode('time');
-    }
-  };
+      if (Platform.OS === 'android' && mode === 'date') {
+        showMode('time', currentDate);
+      }
+    };
 
-  const showMode = (currentMode: 'time' | 'date') => {
+  const showMode = (currentMode: 'time' | 'date', currentDate?: Date) => {
     DateTimePickerAndroid.open({
-      value: date,
+      value: currentDate ?? date,
       onChange: onChange(currentMode),
       mode: currentMode,
       is24Hour: true,
+      minimumDate: TODAY,
     });
   };
 
@@ -64,13 +70,17 @@ const EventCreator = () => {
   return (
     <View>
       <Button title="Выберите дату" onPress={showDatepicker} />
-      <Text>Выбрано: {date.toLocaleString()}</Text>
-      <DateTimePicker
-        value={date}
-        mode={Platform.select({default: 'date', ios: 'datetime'})}
-        onChange={onChange('date')}
-        minimumDate={TODAY}
-      />
+
+      {Platform.OS === 'ios' ? (
+        <DateTimePicker
+          value={date}
+          mode={Platform.select({default: 'date', ios: 'datetime'})}
+          onChange={onChange('date')}
+          minimumDate={TODAY}
+        />
+      ) : (
+        <Text>Выбрано: {date.toLocaleString()}</Text>
+      )}
       <TextInput
         placeholder="Название таймера"
         value={timerName}
