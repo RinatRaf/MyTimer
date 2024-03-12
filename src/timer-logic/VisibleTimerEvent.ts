@@ -33,7 +33,7 @@ export class VisibleTimerEvent implements TimerEvent {
     const seconds =
       leftTimes.seconds > 9 ? leftTimes.seconds : `0${leftTimes.seconds}`;
 
-    return `Осталось до Праздника ${leftTimes.days} дней ${hours}:${minutes}:${seconds}`;
+    return `Осталось до ${this.name}  ${leftTimes.days} дней ${hours}:${minutes}:${seconds}`;
   }
 
   static timerEventFactory(eventTime: number, eventName: string) {
@@ -46,7 +46,9 @@ export type VisibleTimerEventFactory = (
   eventName: string,
 ) => VisibleTimerEvent;
 
-supervisor.registerModuleFactory(
-  'VisibleTimerEvent',
-  VisibleTimerEvent.timerEventFactory,
-);
+export const registerTimerEvent = () => {
+  supervisor.registerModuleFactory(
+    'VisibleTimerEvent',
+    VisibleTimerEvent.timerEventFactory,
+  );
+};

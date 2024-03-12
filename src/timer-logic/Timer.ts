@@ -38,4 +38,6 @@ function createTicker(): ObservableTicker {
   return ticker;
 }
 
-supervisor.registerSingletonModule('Ticker', createTicker());
+export const registerTimer = () => {
+  supervisor.registerSingletonModule('Ticker', createTicker());
+};
