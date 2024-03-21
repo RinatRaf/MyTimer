@@ -9,20 +9,23 @@ import {
   View,
 } from 'react-native';
 import {supervisor} from './src/di';
-import './src/timer-logic';
+import {TimerList} from './src/timer-logic';
 import DateTimePicker, {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
+import {initModules} from './src/initModules';
+
+initModules();
 
 export const ObservableApp = observer(function App() {
   const TimerRepository = supervisor.getSingleton('TimerRepository');
-  const timers = TimerRepository.timerList;
   useEffect(() => {
     TimerRepository.loadTimers();
     return () => supervisor.getSingleton('Ticker').cleanup();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <SafeAreaView>
       <EventCreator />
@@ -32,9 +35,7 @@ export const ObservableApp = observer(function App() {
         }}
         title="Удалить все"
       />
-      {timers.map(timer => (
-        <Text key={timer.name}>{timer.timeLeftString}</Text>
-      ))}
+      <TimerList />
     </SafeAreaView>
   );
 });

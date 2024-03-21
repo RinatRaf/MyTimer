@@ -1,4 +1,4 @@
-import {makeAutoObservable, runInAction} from 'mobx';
+import {autorun, makeAutoObservable, observable, runInAction} from 'mobx';
 import {VisibleTimerEvent} from '.';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {TimerEvent} from './VisibleTimerEvent';
@@ -8,8 +8,12 @@ const TIMERS_KEY = 'timer';
 
 export class TimerRepository {
   public timerList: Array<VisibleTimerEvent> = [];
+
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {timerList: observable});
+    autorun(() => {
+      console.log(this.timerList);
+    });
   }
 
   async loadTimers() {
@@ -57,6 +61,24 @@ export class TimerRepository {
       console.error(e);
     }
   }
+
+  deleteTimer = async (title: string) => {
+    try {
+      const timersJson = await AsyncStorage.getItem(TIMERS_KEY);
+      if (timersJson === null) {
+        return;
+      }
+      const timers = JSON.parse(timersJson) as TimerEvent[];
+      const filteredTimers = timers.filter(timer => timer.name !== title);
+      await AsyncStorage.setItem(TIMERS_KEY, JSON.stringify(filteredTimers));
+
+      runInAction(() => {
+        this.timerList = this.timerList.filter(timer => timer.name !== title);
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   async deleteAllTimers() {
     try {
