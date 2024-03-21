@@ -15,21 +15,26 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 
-const april12 = new Date();
-april12.setMonth(3);
-april12.setDate(12);
-april12.setHours(0, 0, 0);
-const timer = supervisor.getModuleFactory('VisibleTimerEvent')(
-  april12.getTime(),
-  '12 Апреля',
-);
-
 export const ObservableApp = observer(function App() {
-  useEffect(() => () => supervisor.getSingleton('Ticker').cleanup(), []);
-
+  const TimerRepository = supervisor.getSingleton('TimerRepository');
+  const timers = TimerRepository.timerList;
+  useEffect(() => {
+    TimerRepository.loadTimers();
+    return () => supervisor.getSingleton('Ticker').cleanup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <SafeAreaView>
       <EventCreator />
+      <Button
+        onPress={() => {
+          TimerRepository.deleteAllTimers();
+        }}
+        title="Удалить все"
+      />
+      {timers.map(timer => (
+        <Text key={timer.name}>{timer.timeLeftString}</Text>
+      ))}
     </SafeAreaView>
   );
 });
@@ -37,6 +42,7 @@ export const ObservableApp = observer(function App() {
 const EventCreator = () => {
   const [date, setDate] = useState(new Date());
   const [timerName, setTimerName] = useState('');
+  const TimerRepository = supervisor.getSingleton('TimerRepository');
 
   const onChange =
     (mode: 'time' | 'date') =>
@@ -65,7 +71,9 @@ const EventCreator = () => {
     showMode('date');
   };
 
-  const createTimer = () => {};
+  const createTimer = () => {
+    TimerRepository.saveTimer({eventTime: date.getTime(), name: timerName});
+  };
 
   return (
     <View>
