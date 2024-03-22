@@ -4,6 +4,7 @@ import {
   Button,
   Platform,
   SafeAreaView,
+  StyleSheet,
   Text,
   TextInput,
   View,
@@ -58,6 +59,8 @@ const EventCreator = () => {
       }
     };
 
+  const dateString = `${date.getDate()}.${date.getMonth()}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
+
   const showMode = (currentMode: 'time' | 'date', currentDate?: Date) => {
     DateTimePickerAndroid.open({
       value: currentDate ?? date,
@@ -77,27 +80,51 @@ const EventCreator = () => {
   };
 
   return (
-    <View>
-      <Button title="Выберите дату" onPress={showDatepicker} />
-
-      {Platform.OS === 'ios' ? (
-        <DateTimePicker
-          value={date}
-          mode={Platform.select({default: 'date', ios: 'datetime'})}
-          onChange={onChange('date')}
-          minimumDate={TODAY}
-        />
-      ) : (
-        <Text>Выбрано: {date.toLocaleString()}</Text>
-      )}
+    <View style={styles.container}>
+      <Text style={styles.heading}>Создать таймер</Text>
       <TextInput
         placeholder="Название таймера"
         value={timerName}
         onChangeText={setTimerName}
       />
+      <View style={styles.selectDateContainer}>
+        <Text style={styles.selectDateText}>Выберите дату и время: </Text>
+
+        {Platform.select({
+          ios: (
+            <DateTimePicker
+              value={date}
+              mode={Platform.select({default: 'date', ios: 'datetime'})}
+              onChange={onChange('date')}
+              minimumDate={TODAY}
+            />
+          ),
+          android: <Button title={dateString} onPress={showDatepicker} />,
+        })}
+      </View>
       <Button title="Создать" onPress={createTimer} />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 8,
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  selectDateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 8,
+  },
+  selectDateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
 
 const TODAY = new Date();
