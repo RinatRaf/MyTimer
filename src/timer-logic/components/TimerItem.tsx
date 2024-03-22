@@ -6,24 +6,33 @@ import {observer} from 'mobx-react-lite';
 type TimerItemProps = {
   event: VisibleTimerEvent;
   onDelete: (title: string) => void;
+  navigateToEventEditor: (eventId: string) => void;
 };
 
-export const TimerItem = observer(({event, onDelete}: TimerItemProps) => {
-  return (
-    <View pointerEvents="box-none" style={styles.content}>
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>{event.name}</Text>
-        <Text>{event.timeLeftString}</Text>
+export const TimerItem = observer(
+  ({event, onDelete, navigateToEventEditor}: TimerItemProps) => {
+    return (
+      <View pointerEvents="box-none" style={styles.content}>
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{event.title}</Text>
+          <Text>{event.timeLeftString}</Text>
+        </View>
+        <Button
+          title="Изменить"
+          onPress={() => {
+            navigateToEventEditor(event.id);
+          }}
+        />
+        <Button
+          title="Удалить"
+          onPress={() => {
+            onDelete(event.title);
+          }}
+        />
       </View>
-      <Button
-        title="Удалить"
-        onPress={() => {
-          onDelete(event.name);
-        }}
-      />
-    </View>
-  );
-});
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   content: {
@@ -41,7 +50,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   textContainer: {
-    flexBasis: '80%',
+    flexBasis: '50%',
     overflow: 'hidden',
   },
 });

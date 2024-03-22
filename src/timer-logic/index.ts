@@ -9,5 +9,5 @@ export function registerTimerLogic() {
 }
 
 export {VisibleTimerEvent} from './VisibleTimerEvent';
-export {TimerList} from './components';
+export {TimerListScreen, EventCreatorScreen} from './components';
 export type {TimerModuleFactories, TimerModuleSingletons} from './types';

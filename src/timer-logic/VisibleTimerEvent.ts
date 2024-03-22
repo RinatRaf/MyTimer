@@ -4,18 +4,21 @@ import {Ticker} from './Timer';
 import {supervisor} from '../di/supervisor';
 
 export interface TimerEvent {
+  id: string;
   eventTime: number;
-  name: string;
+  title: string;
 }
 
 export class VisibleTimerEvent implements TimerEvent {
+  public id: string;
   public eventTime: number;
-  public name: string;
+  public title: string;
   private ticker: Ticker;
 
-  constructor(eventTime: number, name: string) {
+  constructor({id, eventTime, title}: TimerEvent) {
     this.eventTime = eventTime;
-    this.name = name;
+    this.title = title;
+    this.id = id;
 
     this.ticker = supervisor.getSingleton('Ticker');
 
@@ -36,15 +39,12 @@ export class VisibleTimerEvent implements TimerEvent {
     return `Осталось ${leftTimes.days} дней ${hours}:${minutes}:${seconds}`;
   }
 
-  static timerEventFactory(eventTime: number, eventName: string) {
-    return new VisibleTimerEvent(eventTime, eventName);
+  static timerEventFactory(event: TimerEvent) {
+    return new VisibleTimerEvent(event);
   }
 }
 
-export type VisibleTimerEventFactory = (
-  eventTime: number,
-  eventName: string,
-) => VisibleTimerEvent;
+export type VisibleTimerEventFactory = (event: TimerEvent) => VisibleTimerEvent;
 
 export const registerTimerEvent = () => {
   supervisor.registerModuleFactory(
