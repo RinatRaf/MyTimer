@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
 import {supervisor} from './src/di';
 import {TimerList} from './src/timer-logic';
 import DateTimePicker, {
@@ -28,16 +29,18 @@ export const ObservableApp = observer(function App() {
   }, []);
 
   return (
-    <SafeAreaView>
-      <EventCreator />
-      <Button
-        onPress={() => {
-          TimerRepository.deleteAllTimers();
-        }}
-        title="Удалить все"
-      />
-      <TimerList />
-    </SafeAreaView>
+    <NavigationContainer>
+      <SafeAreaView>
+        <EventCreator />
+        <Button
+          onPress={() => {
+            TimerRepository.deleteAllTimers();
+          }}
+          title="Удалить все"
+        />
+        <TimerList />
+      </SafeAreaView>
+    </NavigationContainer>
   );
 });
 
