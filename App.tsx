@@ -4,6 +4,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {supervisor} from './src/di';
 import {initModules} from './src/initModules';
 import {Navigator} from './src/navigator';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 initModules();
 
@@ -16,8 +17,10 @@ export const ObservableApp = observer(function App() {
   }, []);
 
   return (
-    <NavigationContainer>
-      <Navigator />
-    </NavigationContainer>
+    <GestureHandlerRootView>
+      <NavigationContainer>
+        <Navigator />
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 });
