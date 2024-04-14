@@ -1,5 +1,5 @@
-import React from 'react';
-import {View} from 'react-native';
+import React, {useCallback} from 'react';
+import {Alert, View} from 'react-native';
 import {TimerItem} from './TimerItem';
 import {supervisor} from '../../di';
 import {observer} from 'mobx-react-lite';
@@ -17,12 +17,34 @@ export const TimerListScreen = observer(({navigation}: TimerListProps) => {
     });
   };
 
+  const onDelete = useCallback(
+    eventId => {
+      Alert.alert(
+        'Удалить таймер?',
+        'Вы уверены что хотите удалить этот таймер',
+        [
+          {
+            text: 'Да',
+            onPress: () => {
+              TimerRepository.deleteTimer(eventId);
+            },
+          },
+          {
+            text: 'Нет',
+            onPress: () => {},
+          },
+        ],
+      );
+    },
+    [TimerRepository],
+  );
+
   return (
     <View>
       {timers.map(timer => (
         <TimerItem
           key={timer.id}
-          onDelete={TimerRepository.deleteTimer}
+          onDelete={onDelete}
           event={timer}
           navigateToEventEditor={navigateToEventEditor}
         />
