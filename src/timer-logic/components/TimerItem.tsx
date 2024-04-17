@@ -1,11 +1,5 @@
-import React from 'react';
-import {
-  Button,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import React, {useMemo} from 'react';
+import {StyleSheet, Text, View, useWindowDimensions} from 'react-native';
 import {VisibleTimerEvent} from '..';
 import {observer} from 'mobx-react-lite';
 import {Gesture, GestureDetector, State} from 'react-native-gesture-handler';
@@ -18,6 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {Button} from 'react-native-elements';
 
 type TimerItemProps = {
   event: VisibleTimerEvent;
@@ -27,14 +22,25 @@ type TimerItemProps = {
 
 const BUTTON_MARGIN = 8;
 const ICON_SIZE = 24;
+const WHITE = '#FFF';
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
+const ICON = {
+  type: 'ionicon',
+  name: 'create-outline',
+  size: 20,
+  color: '#00f',
+};
 
 export const TimerItem = observer(
   ({event, onDelete, navigateToEventEditor}: TimerItemProps) => {
     const dragX = useSharedValue(0);
     const {width} = useWindowDimensions();
     const eventId = event.id;
+    const widthStyle = useMemo(() => {
+      return {width};
+    }, [width]);
+
     const gesture = Gesture.Pan()
       .onChange(event => {
         if (event.translationX > 0) {
@@ -46,8 +52,6 @@ export const TimerItem = observer(
         dragX.value = event.translationX;
       })
       .onEnd(event => {
-        console.log(width / 3);
-
         if (dragX.value <= -(width / 3)) {
           if (event.state === State.CANCELLED || event.state === State.FAILED) {
             return;
@@ -103,35 +107,27 @@ export const TimerItem = observer(
     return (
       <GestureDetector gesture={gesture}>
         <Animated.View pointerEvents="box-none" style={[containerStyle]}>
-          <View style={[styles.content, {width}]}>
+          <View style={StyleSheet.compose(styles.content, widthStyle)}>
             <View style={styles.textContainer}>
               <Text style={styles.title}>{event.title}</Text>
               <Text>{event.timeLeftString}</Text>
             </View>
             <Button
-              title="Изменить"
+              type="clear"
+              icon={ICON}
+              style={styles.editButton}
               onPress={() => {
                 navigateToEventEditor(event.id);
               }}
             />
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              width: width,
-              backgroundColor: 'red',
-              height: 50,
-              paddingLeft: BUTTON_MARGIN,
-            }}>
+          <View style={StyleSheet.compose(styles.deleteContainer, widthStyle)}>
             <Animated.View style={rightButtonStyle}>
               <AnimatedIcon
                 size={ICON_SIZE}
                 style={rightIconProps}
                 name="trash-outline"
-                color="white"
-                backgroundColor="#f00"
+                color={WHITE}
               />
             </Animated.View>
           </View>
@@ -144,6 +140,7 @@ export const TimerItem = observer(
 const styles = StyleSheet.create({
   content: {
     height: 50,
+    backgroundColor: WHITE,
     flexWrap: 'nowrap',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -160,5 +157,18 @@ const styles = StyleSheet.create({
   textContainer: {
     flexBasis: '50%',
     overflow: 'hidden',
+  },
+  deleteContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: 'red',
+    height: 50,
+    paddingLeft: BUTTON_MARGIN,
+  },
+  editButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 4,
   },
 });

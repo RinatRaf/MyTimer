@@ -18,7 +18,7 @@ export const TimerListScreen = observer(({navigation}: TimerListProps) => {
   };
 
   const onDelete = useCallback(
-    eventId => {
+    (eventId: string) => {
       Alert.alert(
         'Удалить таймер?',
         'Вы уверены что хотите удалить этот таймер',
